@@ -2,6 +2,6 @@ fastapi
 uvicorn
 streamlit
 scikit-learn
-tensorflow
+
 numpy
 pandas
