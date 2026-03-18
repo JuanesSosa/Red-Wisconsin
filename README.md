@@ -1,22 +1,62 @@
+# Neural Network – Breast Cancer Classification
 
-# Install the viraual environment
-> python -m venv .venv
+Este proyecto implementa una red neuronal para clasificar tumores como benignos o malignos usando el dataset Breast Cancer Wisconsin.
 
-# Activate the venv in Windows
-> .\.venv\Scripts\activate
+## Dataset
 
-# Activate the venv in Linux
-> source .venv\bin\activate
+* 569 muestras
+* 30 características
+* Clases:
 
-# install requirements packages
-> pip intall -r .\requirements.txt
+  * 0 → Malignant
+  * 1 → Benign
 
-# Abre un terminal y ejecutas el Backend:
-> uvicorn app.main:app --reload --port 8000
+## Arquitectura
 
-# abre otro terminal y ejecutas el frontned
-> streamlit run ui/app.py
+* Entrada: 30 neuronas
+* Capas ocultas: 16 y 8 neuronas (ReLU)
+* Salida: 1 neurona (Sigmoid)
+* Loss: Binary Crossentropy
+* Optimizer: Adam
 
-# with poetry
-Pretty soon
+## Instalación
 
+```bash
+python -m venv .venv
+```
+
+### Activar entorno
+
+Windows:
+
+```bash
+.\.venv\Scripts\activate
+```
+
+Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+### Instalar dependencias
+
+```bash
+pip install -r requirements.txt
+```
+
+## Ejecutar backend
+
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+## Ejecutar frontend
+
+```bash
+streamlit run ui/app.py
+```
+
+## Integrantes
+
+* Juan Esteban Sosa

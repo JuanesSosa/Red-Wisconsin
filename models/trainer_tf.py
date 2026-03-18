@@ -1,14 +1,21 @@
-# app/models/trainer_tf.py
-import tensorflow as tf
-from .tensorflow_arch import build_tabular_model
-from pathlib import Path
+from models.tensorflow_arch import build_model
 
-def train_tabular(X_train, y_train, X_test, y_test, epochs=20):
-    model = build_tabular_model(input_dim=X_train.shape[1])
-    print(f"train_tabular: X_train shape {X_train.shape}, y_train shape {y_train.shape}")
-    print(f"train_tabular: X_test shape {X_test.shape}, y_test shape {y_test.shape}")
-    model.fit(X_train, y_train, epochs=epochs,
-              validation_data=(X_test, y_test))
-    save_dir = Path("models/saved/tf_tabular.keras")
-    model.save(save_dir)
-    return save_dir
+def train_model(X_train, y_train):
+    model = build_model(input_dim=30)
+
+    model.compile(
+        optimizer='adam',
+        loss='binary_crossentropy',
+        metrics=['accuracy']
+    )
+
+    history = model.fit(
+        X_train,
+        y_train,
+        epochs=50,
+        batch_size=32,
+        validation_split=0.2,
+        verbose=0
+    )
+
+    return model, history

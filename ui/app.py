@@ -1,71 +1,29 @@
 import streamlit as st
 import requests
-import pandas as pd
 
-FASTAPI_URL = "http://localhost:8000"
+st.title("Clasificación de Cáncer de Mama")
 
-st.title("Demo Multimodal con TensorFlow / PyTorch")
+# Entrenar modelo
+if st.button("Entrenar modelo"):
+    res = requests.get("http://localhost:8000/train").json()
+    st.success(f"Modelo entrenado - Accuracy: {res['accuracy']:.4f}")
 
-data_type = st.selectbox("Tipo de dato", ["tabular", "image", "audio"])
-framework = st.selectbox("Framework", ["tensorflow", "pytorch"])
-mode = st.radio("Modo de operación", ["Entrenar", "Predecir"])   
+st.write("Ingrese los 30 valores:")
 
-if mode == "Entrenar" and data_type == "tabular":
-    st.subheader("Entrenamiento")
-    csv_file = st.file_uploader("Sube CSV de entrenamiento", type="csv")
-    if csv_file is not None:
-        # Read the uploaded CSV into a DataFrame
-        df = pd.read_csv(csv_file)
+inputs = []
+for i in range(30):
+    val = st.number_input(f"Feature {i+1}", value=0.0)
+    inputs.append(val)
 
-        st.subheader("First 5 Rows")
-        st.dataframe(df.head())   # shows only the first 5 rows
-    epochs = st.slider("Épocas", 1, 100, 20)
-    if csv_file and st.button("Entrenar"):
-        files = {"csv_file": (csv_file.name, csv_file.getvalue(), "text/csv")}
-        data = {"framework": framework, "data_type": data_type, "epochs": str(epochs)}
-        with st.spinner("Entrenando el modelo..."):
-            res = requests.post(f"{FASTAPI_URL}/train/", files=files, data=data)
-        st.write("Status:", res.status_code)
-        st.write("Raw response:", res.text)
+if st.button("Predecir"):
+    res = requests.post(
+        "http://localhost:8000/predict",
+        json=inputs
+    ).json()
 
-        st.write(res.json())
+    st.write(f"Probabilidad: {res['probability']:.4f}")
 
-elif mode == "Predecir":
-    if data_type == "tabular":
-        st.subheader("Predicción")
-        csv_file = st.file_uploader("Sube CSV a predecir", type="csv")
-        if csv_file is not None:
-            # Read the uploaded CSV into a DataFrame
-            df = pd.read_csv(csv_file)
-
-            st.subheader("First 5 Rows")
-            st.dataframe(df.head())   # shows only the first 5 rows
-        
-        if csv_file and st.button("Predecir"):
-            # OJO: para FastAPI mandamos multipart/form-data con 'files'
-            files = {
-                "csv_file": (csv_file.name, csv_file.getvalue(), "text/csv")
-            }
-            data = {
-                "data_type": "tabular",
-                "framework": framework,  # el que hayas seleccionado en tu UI
-            }
-
-            # Ahora sí: enviar archivo + form-data a FastAPI
-            res = requests.post(f"{FASTAPI_URL}/predict/", data=data, files=files)
-
-            st.write("Status:", res.status_code)
-            st.write("Raw response:", res.text)
-
-            if res.ok:
-                st.success("Predicción:")
-                st.json(res.json())
-            else:
-                st.error("Error en la predicción")
+    if res["class"] == "Benign":
+        st.success("Resultado: Benigno")
     else:
-        file = st.file_uploader("Sube archivo", type=["png","jpg","wav","mp3"])
-        if file and st.button("Predecir"):
-            data = {"data_type": data_type, "framework": framework}
-            files = {"file": (file.name, file.getvalue())}
-            r = requests.post(f"{FASTAPI_URL}/predict/", data=data, files=files)
-            st.write(r.json())
+        st.error("Resultado: Maligno")
